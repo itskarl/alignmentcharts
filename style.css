@@ -86,7 +86,9 @@ h1 {
   font-size: 1.2rem;
   text-align: center;
   position: absolute;
-  top: 100px;
+  top: 120px;
+  left: -48%;
+  width: 100%;
 }
 
 /* Upload button wrapper (centered, hidden by default) */
@@ -169,6 +171,8 @@ h1 {
 .cell.add-button {
     cursor: pointer;
     border-radius: 50%;
+    width: 50px;
+    height: 50px;
 }
 .cell.cell.add-button:hover {
   background: rgb(235, 235, 235);
