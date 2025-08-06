@@ -1,0 +1,175 @@
+body {
+  font-family: sans-serif;
+  background-color: #fff;
+  color: #000;
+  padding: 40px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+h1 {
+  font-weight: 600;
+  margin-bottom: 30px;
+}
+
+#chart {
+  display: grid;
+  gap: 0;
+  padding: 5px;
+  position: relative;
+}
+
+.actions-bar {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  align-items: flex-end
+}
+/* Base cell */
+.cell {
+  background: transparent;
+  color: #000;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  font-size: 0.9rem;
+  padding: 4px;
+  overflow: hidden;
+}
+
+/* Interior cells */
+.grid-cell {
+  min-width: 200px;
+  min-height: 200px;
+  aspect-ratio: 1 / 1;
+  border: 2px solid #000;
+  box-sizing: border-box;
+  background-color: #fff;
+  position: relative;
+  overflow: hidden;
+  margin: -1px;
+}
+
+/* Labels */
+.label {
+  position: relative;
+  font-weight: bold;
+  font-size: 1rem;
+  text-align: center;
+  word-break: break-word;
+  white-space: normal;
+  overflow-wrap: break-word;
+  padding: 4px;
+}
+
+/* Axis titles */
+.axis-label {
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.axis-x {
+  grid-row: 1;
+  text-align: center;
+}
+
+.axis-y {
+  transform: rotate(-90deg);
+  transform-origin: center;
+  white-space: nowrap;
+  font-weight: bold;
+  font-size: 1.2rem;
+  text-align: center;
+  position: absolute;
+  top: 100px;
+}
+
+/* Upload button wrapper (centered, hidden by default) */
+.upload-buttons {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  gap: 4px;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.grid-cell:hover .upload-buttons {
+  display: flex;
+  flex-direction: column;
+}
+
+.upload-buttons button {
+  border: none;
+  background: rgba(173, 179, 228, 0.9);
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 2px 4px;
+  border-radius: 20px;
+  width: auto;
+  height: 40px;
+  align-items: center;
+  padding: 5px;
+}
+
+/* Label overlays */
+.combo-label {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  right: 4px;
+  background: rgba(255, 255, 255, 0.8);
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #000;
+  pointer-events: none;
+  text-align: center;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+/* Delete button (hidden until hover) */
+.delete-btn {
+  position: absolute;
+  top: calc(50% - 20px);
+  right: 4px;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  color: red;
+  font-weight: bold;
+  cursor: pointer;
+  display: none;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.label:hover .delete-btn {
+  display: block;
+}
+
+#resetButton, #downloadImage {
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  border: none;
+  background: #c7d6ff;
+  color: #000;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.cell.add-button {
+    cursor: pointer;
+    border-radius: 50%;
+}
+.cell.cell.add-button:hover {
+  background: rgb(235, 235, 235);
+}
