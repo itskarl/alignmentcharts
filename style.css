@@ -125,10 +125,10 @@ h1 {
   bottom: 4px;
   left: 4px;
   right: 4px;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(0, 0, 0, 0.8);
   font-size: 0.8rem;
   font-weight: bold;
-  color: #000;
+  color: #fff;
   pointer-events: none;
   text-align: center;
   padding: 2px 4px;
