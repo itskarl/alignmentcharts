@@ -3,8 +3,8 @@ const chart = document.getElementById("chart");
 let rows = 3;
 let cols = 3;
 
-let rowLabels = ["Y1", "Y2", "Y3"];
-let colLabels = ["X1", "X2", "X3"];
+let rowLabels = ["Good", "Neutral", "Evil"];
+let colLabels = ["Lawful", "Neutral", "Chaotic"];
 let axisTopLabel = "X-Axis";
 let axisLeftLabel = "Y-Axis";
 
