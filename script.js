@@ -179,6 +179,7 @@ function renderGrid() {
       const uploadDevice = document.createElement("button");
       uploadDevice.textContent = "Upload from device";
       uploadDevice.title = "Upload from device";
+      uploadDevice.contentEditable = false;
       uploadDevice.onclick = () => {
         const input = document.createElement("input");
         input.type = "file";
@@ -199,6 +200,7 @@ function renderGrid() {
       const uploadURL = document.createElement("button");
       uploadURL.textContent = "Upload via URL";
       uploadURL.title = "Upload via URL";
+      uploadURL.contentEditable = false;
       uploadURL.onclick = () => {
         const url = prompt("Enter image URL:");
         if (url) {

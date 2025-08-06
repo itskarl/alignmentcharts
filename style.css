@@ -11,7 +11,13 @@ body {
 
 h1 {
   font-weight: 600;
-  margin-bottom: 30px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  align-items: center;
 }
 
 #chart {
@@ -24,8 +30,8 @@ h1 {
 .actions-bar {
   display: flex;
   gap: 12px;
-  width: 100%;
-  align-items: flex-end
+  align-items: flex-end;
+  flex-wrap: wrap;
 }
 /* Base cell */
 .cell {
@@ -110,15 +116,18 @@ h1 {
 
 .upload-buttons button {
   border: none;
-  background: rgba(173, 179, 228, 0.9);
   cursor: pointer;
-  font-size: 0.8rem;
-  padding: 2px 4px;
+  font-size: 0.7rem;
+  padding: 2px 8px;
   border-radius: 20px;
   width: auto;
   height: 40px;
   align-items: center;
-  padding: 5px;
+  background: #5b6da0;
+  color: #ffffff;
+  cursor: pointer;
+  border-radius: 20px;
+  font-weight: bold;
 }
 
 /* Label overlays */
@@ -159,21 +168,24 @@ h1 {
 }
 
 #resetButton, #downloadImage {
-  padding: 6px 12px;
+  padding: 8px 20px;
   font-size: 0.9rem;
   border: none;
-  background: #c7d6ff;
-  color: #000;
+  background: #5b6da0;
+  color: #ffffff;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 20px;
+  font-weight: bold;
+  z-index: 3;
 }
 
 .cell.add-button {
     cursor: pointer;
     border-radius: 50%;
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
 }
+
 .cell.cell.add-button:hover {
   background: rgb(235, 235, 235);
 }
