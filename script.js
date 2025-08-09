@@ -63,6 +63,7 @@ function renderGrid() {
   chart.appendChild(makeAt(2, 1, makeCell("", "cell")));
   chart.appendChild(makeAt(2, 2, makeCell("", "cell")));
 
+  // Column labels
   for (let c = 0; c < cols; c++) {
     const label = makeCell("", "cell label");
     label.style.gridRow = "2";
@@ -90,6 +91,7 @@ function renderGrid() {
         colLabels.splice(c, 1);
         for (let r = 0; r < rows; r++) {
           localStorage.removeItem(`cell_${r}_${c}`);
+          localStorage.removeItem(`cell_text_${r}_${c}`);
         }
         cols--;
         saveState();
@@ -103,6 +105,7 @@ function renderGrid() {
 
   chart.appendChild(makeAt(2, cols + 3, makeAddButton("column")));
 
+  // Y axis label
   const axisY = makeCell(axisLeftLabel, "cell axis-label axis-y");
   axisY.contentEditable = true;
   axisY.style.gridRow = `3 / span ${rows}`;
@@ -114,6 +117,7 @@ function renderGrid() {
   });
   chart.appendChild(axisY);
 
+  // Rows
   for (let r = 0; r < rows; r++) {
     const rowNum = r + 3;
 
@@ -143,6 +147,7 @@ function renderGrid() {
         rowLabels.splice(r, 1);
         for (let c = 0; c < cols; c++) {
           localStorage.removeItem(`cell_${r}_${c}`);
+          localStorage.removeItem(`cell_text_${r}_${c}`);
         }
         rows--;
         saveState();
@@ -153,33 +158,49 @@ function renderGrid() {
 
     chart.appendChild(rowLabel);
 
+    // Cells
     for (let c = 0; c < cols; c++) {
       const colNum = c + 3;
-      const cellKey = `cell_${r}_${c}`;
+      const imgKey = `cell_${r}_${c}`;
+      const textKey = `cell_text_${r}_${c}`;
+
       const cell = makeCell("", "cell grid-cell");
-      cell.contentEditable = true;
+      cell.contentEditable = false;
       cell.style.gridRow = `${rowNum}`;
       cell.style.gridColumn = `${colNum}`;
 
-      const imgUrl = localStorage.getItem(cellKey);
+      // Background image
+      const imgUrl = localStorage.getItem(imgKey);
       if (imgUrl) {
         cell.style.backgroundImage = `url('${imgUrl}')`;
         cell.style.backgroundSize = 'cover';
         cell.style.backgroundPosition = 'center';
       }
 
-      const combo = document.createElement("div");
-      combo.className = "combo-label";
-      combo.textContent = `${colLabels[c] || `X${c + 1}`} / ${rowLabels[r] || `Y${r + 1}`}`;
-      cell.appendChild(combo);
+      // Editable overlay text
+      const savedText = localStorage.getItem(textKey);
+      const fallback = `${colLabels[c] || `X${c + 1}`} / ${rowLabels[r] || `Y${r + 1}`}`;
+      const labelDiv = document.createElement("div");
+      labelDiv.className = "combo-label";
+      labelDiv.contentEditable = true;
+      labelDiv.textContent = savedText ?? fallback;
+      labelDiv.addEventListener("blur", () => {
+        const value = labelDiv.textContent.trim();
+        if (value === "" || value === fallback) {
+          localStorage.removeItem(textKey);
+        } else {
+          localStorage.setItem(textKey, value);
+        }
+      });
+      cell.appendChild(labelDiv);
 
+      // Upload buttons
       const btnWrapper = document.createElement("div");
       btnWrapper.className = "upload-buttons";
 
       const uploadDevice = document.createElement("button");
-      uploadDevice.textContent = "Upload from device";
+      uploadDevice.textContent = "Upload (device)";
       uploadDevice.title = "Upload from device";
-      uploadDevice.contentEditable = false;
       uploadDevice.onclick = () => {
         const input = document.createElement("input");
         input.type = "file";
@@ -189,7 +210,7 @@ function renderGrid() {
           if (!file) return;
           const reader = new FileReader();
           reader.onload = (e) => {
-            localStorage.setItem(cellKey, e.target.result);
+            localStorage.setItem(imgKey, e.target.result);
             renderGrid();
           };
           reader.readAsDataURL(file);
@@ -198,21 +219,34 @@ function renderGrid() {
       };
 
       const uploadURL = document.createElement("button");
-      uploadURL.textContent = "Upload via URL";
+      uploadURL.textContent = "Upload (url)";
       uploadURL.title = "Upload via URL";
-      uploadURL.contentEditable = false;
       uploadURL.onclick = () => {
         const url = prompt("Enter image URL:");
         if (url) {
-          localStorage.setItem(cellKey, url);
+          localStorage.setItem(imgKey, url);
           renderGrid();
         }
       };
 
       btnWrapper.appendChild(uploadDevice);
       btnWrapper.appendChild(uploadURL);
-      cell.appendChild(btnWrapper);
 
+      // NEW: Remove image button if image exists
+      if (imgUrl) {
+        const clearBtn = document.createElement("button");
+        clearBtn.textContent = "Delete";
+        clearBtn.title = "Remove image";
+        clearBtn.style.backgroundColor = "tomato";
+        clearBtn.onclick = (e) => {
+          e.stopPropagation();
+          localStorage.removeItem(imgKey);
+          renderGrid();
+        };
+        btnWrapper.appendChild(clearBtn);
+      }
+
+      cell.appendChild(btnWrapper);
       chart.appendChild(cell);
     }
 
@@ -220,11 +254,9 @@ function renderGrid() {
   }
 
   chart.appendChild(makeAt(rows + 3, 2, makeAddButton("row")));
-
   for (let c = 0; c < cols; c++) {
     chart.appendChild(makeAt(rows + 3, c + 3, makeCell("", "cell")));
   }
-
   chart.appendChild(makeAt(rows + 3, cols + 3, makeCell("", "cell")));
 }
 
@@ -261,17 +293,13 @@ document.getElementById("resetButton").addEventListener("click", () => {
   const confirmed = confirm("Are you sure you want to reset the entire chart?");
   if (!confirmed) return;
 
-  // Clear saved chart state
   localStorage.removeItem("chart_state");
-
-  // Clear all cell images
   Object.keys(localStorage).forEach(key => {
     if (key.startsWith("cell_")) {
       localStorage.removeItem(key);
     }
   });
 
-  // Reset to default
   rows = 3;
   cols = 3;
   rowLabels = ["Good", "Neutral", "Evil"];
@@ -286,12 +314,19 @@ document.getElementById("resetButton").addEventListener("click", () => {
 document.getElementById("downloadImage").addEventListener("click", () => {
   const chartElement = document.getElementById("chart");
 
+  // Hide all add buttons before capture
+  const addButtons = document.querySelectorAll(".add-button");
+  addButtons.forEach(btn => btn.style.display = "none");
+
   html2canvas(chartElement, {
-    backgroundColor: "#ffffff", // ensures white background
+    backgroundColor: "#ffffff",
     useCORS: true
   }).then(canvas => {
+    // Restore buttons after capture
+    addButtons.forEach(btn => btn.style.display = "");
+
     const link = document.createElement("a");
-    link.download = "alignment-chart.png";
+    link.download = `${axisTopLabel}_${axisLeftLabel}.png`;
     link.href = canvas.toDataURL("image/png");
     link.click();
   });
