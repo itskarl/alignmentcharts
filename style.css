@@ -182,11 +182,13 @@ h1 {
 
 .cell.add-button {
     cursor: pointer;
-    border-radius: 50%;
+    border-radius: 10px;
     width: 40px;
-    height: 40px;
+    height: 20px;
+  background: #5b6da0;
+  color: #ffffff;
 }
 
 .cell.cell.add-button:hover {
-  background: rgb(235, 235, 235);
+  background: rgb(114, 115, 131);
 }

@@ -268,7 +268,7 @@ function makeCell(content, className = "") {
 }
 
 function makeAddButton(type) {
-  const btn = makeCell("+", "cell add-button");
+  const btn = makeCell("+ row", "cell add-button");
   btn.addEventListener("click", () => {
     if (type === "row") {
       rows++;
