@@ -1,3 +1,91 @@
+// --- Error UI (non-breaking) ---------------------------------
+function ensureErrorBar() {
+  if (document.getElementById("errorBar")) return;
+  const bar = document.createElement("div");
+  bar.id = "errorBar";
+  bar.style.cssText = `
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    background: #ffe9e9;
+    color: #7a1f1f;
+    border: 1px solid #f2bcbc;
+    padding: 10px 12px;
+    margin: 10px;
+    border-radius: 8px;
+    display: none;
+    font: 14px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  `;
+  const msg = document.createElement("div");
+  msg.id = "errorBarMsg";
+  msg.style.whiteSpace = "pre-wrap";
+  const btn = document.createElement("button");
+  btn.textContent = "✕";
+  btn.title = "Dismiss";
+  btn.style.cssText = `
+    float: right;
+    border: 0;
+    background: transparent;
+    font-size: 16px;
+    cursor: pointer;
+    color: inherit;
+  `;
+  btn.addEventListener("click", () => (bar.style.display = "none"));
+  bar.appendChild(btn);
+  bar.appendChild(msg);
+  document.body.prepend(bar);
+}
+
+function showError(message) {
+  ensureErrorBar();
+  const bar = document.getElementById("errorBar");
+  const msg = document.getElementById("errorBarMsg");
+  msg.textContent = message;
+  bar.style.display = "block";
+}
+
+// Safely set localStorage item, show a friendly error if quota is exceeded.
+function setItemSafe(key, value) {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (err) {
+    if (
+      err &&
+      (err.name === "QuotaExceededError" ||
+        err.name === "NS_ERROR_DOM_QUOTA_REACHED" ||
+        err.code === 22)
+    ) {
+      showError(
+        "Storage is full. This likely happened because an image or text exceeded your 5MB localStorage limit. " +
+          "Try deleting some cell images (use the Delete button in a cell) or use an image URL instead of uploading from device."
+      );
+      return false;
+    }
+    // Other errors
+    showError("Failed to save data to your browser storage. " + String(err));
+    return false;
+  }
+}
+
+// Global catch for any uncaught quota errors thrown elsewhere
+window.addEventListener("error", (ev) => {
+  const err = ev.error;
+  if (
+    err &&
+    (err.name === "QuotaExceededError" ||
+      err.name === "NS_ERROR_DOM_QUOTA_REACHED" ||
+      err.code === 22)
+  ) {
+    showError(
+      "Storage is full. Some recent changes could not be saved. " +
+        "Consider removing a few images or switching to image URLs."
+    );
+  }
+});
+// --------------------------------------------------------------
+
+
 const chart = document.getElementById("chart");
 
 let rows = 3;
@@ -17,7 +105,7 @@ function saveState() {
     axisTopLabel,
     axisLeftLabel
   };
-  localStorage.setItem("chart_state", JSON.stringify(state));
+  setItemSafe("chart_state", JSON.stringify(state));
 }
 
 function loadState() {
@@ -189,7 +277,10 @@ function renderGrid() {
         if (value === "" || value === fallback) {
           localStorage.removeItem(textKey);
         } else {
-          localStorage.setItem(textKey, value);
+          // Use safe setter
+          if (!setItemSafe(textKey, value)) {
+            // If it failed to save (quota), inform user but keep UI text as-is.
+          }
         }
       });
       cell.appendChild(labelDiv);
@@ -210,8 +301,10 @@ function renderGrid() {
           if (!file) return;
           const reader = new FileReader();
           reader.onload = (e) => {
-            localStorage.setItem(imgKey, e.target.result);
-            renderGrid();
+            const ok = setItemSafe(imgKey, e.target.result);
+            if (ok) {
+              renderGrid();
+            }
           };
           reader.readAsDataURL(file);
         };
@@ -224,15 +317,17 @@ function renderGrid() {
       uploadURL.onclick = () => {
         const url = prompt("Enter image URL:");
         if (url) {
-          localStorage.setItem(imgKey, url);
-          renderGrid();
+          const ok = setItemSafe(imgKey, url);
+          if (ok) {
+            renderGrid();
+          }
         }
       };
 
       btnWrapper.appendChild(uploadDevice);
       btnWrapper.appendChild(uploadURL);
 
-      // NEW: Remove image button if image exists
+      // Remove image button if image exists
       if (imgUrl) {
         const clearBtn = document.createElement("button");
         clearBtn.textContent = "Delete";
@@ -268,7 +363,7 @@ function makeCell(content, className = "") {
 }
 
 function makeAddButton(type) {
-  const btn = makeCell("+ row", "cell add-button");
+  const btn = makeCell(type === "row" ? "+ row" : "+ col", "cell add-button");
   btn.addEventListener("click", () => {
     if (type === "row") {
       rows++;
@@ -331,6 +426,5 @@ document.getElementById("downloadImage").addEventListener("click", () => {
     link.click();
   });
 });
-
 
 renderGrid();
